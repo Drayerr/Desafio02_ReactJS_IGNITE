@@ -32,6 +32,8 @@ const Home = (): JSX.Element => {
     return sumAmount
   }, {} as CartItemsAmount)
 
+  console.log('A var lá man', cartItemsAmount);
+  
   useEffect(() => {
     async function loadProducts() {
       const response = await api.get('/products')
@@ -48,7 +50,6 @@ const Home = (): JSX.Element => {
 
     addProduct(id)
 
-    localStorage.setItem('@RocketShoes:cart', JSON.stringify(cart))
   }
 
   return (

@@ -34,26 +34,54 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const addProduct = async (productId: number) => {
     try {
+      const newCart = [...cart]
+      //buscando dados lá do estoque para saber se ainda tem o produto
       const response = await api.get('stock')
-      const stock = response.data
+      const inStock = response.data
 
-      const itsOver = stock.find((product: Stock) => product.id === productId)
+      //encontrando produto no estoque pelo ID
+      const selectedProduct = inStock.find((product: Stock) => product.id === productId)
+      
+      //verificando se o produto já existe no carrinho
+      const alreadyInCart = newCart.find(item => item.id === productId)
+      //Se o produto já existe no carrinho, pega a quantidade que já tinha. Else {ZERO}
+      const cartAmount = alreadyInCart ? alreadyInCart.amount : 0
+      const newAmount = cartAmount +1
 
+      if(newAmount > selectedProduct.amount) {
+        toast.error('Quantidade solicitada fora de estoque');
+        return
+      }
 
-      console.log('sim cara, eu to loggando saporra', itsOver);
+      //Se produto já existe no carrinho, apenas atualiza o valor
+      //Se não, busca os dados daquele produto pelo ID na api e insere todos eles e inclui o amount
+      if(alreadyInCart) {
+        alreadyInCart.amount = newAmount
+      } else {
+        const product = await api.get(`stock/${productId}`)
+
+        const newProductToCart = {...product.data, amount : 1}
+
+        newCart.push(newProductToCart)
+      }
+
+      //setCart altera o valor da variável 'cart' para o que passarmos como parâmetro
+      setCart(newCart)
+
+      //Define novamente o localstorage, passando o carrinho novamente depois de já atualizado
+      localStorage.setItem('@RocketSeat:cart', JSON.stringify(newCart))
 
     } catch {
-      // TODO
-      console.log('É mano, deu mt certo não KKKKK');
-      
+      toast.error('Erro na adição do produto');
     }
   };
 
+  //remover produto do carrinho
   const removeProduct = (productId: number) => {
     try {
       // TODO
     } catch {
-      // TODO
+      toast.error('Erro na remoção do produto');
     }
   };
 
