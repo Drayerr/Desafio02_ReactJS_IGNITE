@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { MdAddShoppingCart } from 'react-icons/md';
 
 import { ProductList } from './styles';
@@ -25,19 +25,14 @@ const Home = (): JSX.Element => {
   const [products, setProducts] = useState<ProductFormatted[]>([]);
   const { addProduct, cart } = useCart();
 
-  //"curto circuito", quando a operação do lado esquerdo dos "pipes" der FALSY
-  //o resultado vai ser o que estiver do lado direito dos "pipes"
-  //tem que colocar o curto circuito por que na primeira RUN do reduce a var sumAmount[id] ainda não existe
-  //como ela ainda não existe, não é possível realizar a operação (sumAmount[id] + 1)
-  const cartItemsAmount = cart.reduce((sumAmount, { id }) => {
-    sumAmount[id] = sumAmount[id] + 1 || 1
-
-    console.log('sumAmount: ', sumAmount);
-    
-    return sumAmount
+  const cartItemsAmount = cart.reduce((sumAmount, product) => {
+    //Desestrutura o objeto sumAmount e atribui na var "newSumAmount", que é retornada no final como novo valor do "sumAmount"
+    const newSumAmount = {...sumAmount};
+    //Cria uma var com o nome do id que está nesta RUN e atribui o valor amount a ele
+    newSumAmount[product.id] = product.amount
+    //Esse return atribui o valor para a var "sumAmount" na próxima RUN
+    return newSumAmount
   }, {} as CartItemsAmount)
-
-  console.log('A var final: ', cartItemsAmount);
 
   useEffect(() => {
     async function loadProducts() {
