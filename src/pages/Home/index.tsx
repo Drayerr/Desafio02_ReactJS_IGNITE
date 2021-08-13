@@ -25,15 +25,20 @@ const Home = (): JSX.Element => {
   const [products, setProducts] = useState<ProductFormatted[]>([]);
   const { addProduct, cart } = useCart();
 
-  const cartItemsAmount = cart.reduce((sumAmount, {id}) => {
-    //"curto circuito", quando a operação do lado esquerdo dos "pipes" der FALSY
-    //o resultado vai ser o que estiver do lado direito dos "pipes"
+  //"curto circuito", quando a operação do lado esquerdo dos "pipes" der FALSY
+  //o resultado vai ser o que estiver do lado direito dos "pipes"
+  //tem que colocar o curto circuito por que na primeira RUN do reduce a var sumAmount[id] ainda não existe
+  //como ela ainda não existe, não é possível realizar a operação (sumAmount[id] + 1)
+  const cartItemsAmount = cart.reduce((sumAmount, { id }) => {
     sumAmount[id] = sumAmount[id] + 1 || 1
+
+    console.log('sumAmount: ', sumAmount);
+    
     return sumAmount
   }, {} as CartItemsAmount)
 
-  console.log('A var lá man', cartItemsAmount);
-  
+  console.log('A var final: ', cartItemsAmount);
+
   useEffect(() => {
     async function loadProducts() {
       const response = await api.get('/products')
@@ -62,7 +67,7 @@ const Home = (): JSX.Element => {
           <button
             type="button"
             data-testid="add-product-button"
-          onClick={() => handleAddProduct(product.id)}
+            onClick={() => handleAddProduct(product.id)}
           >
             <div data-testid="cart-product-quantity">
               <MdAddShoppingCart size={16} color="#FFF" />

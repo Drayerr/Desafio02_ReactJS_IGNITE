@@ -60,7 +60,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       } else {
         const product = await api.get(`stock/${productId}`)
 
-        const newProductToCart = {...product.data, amount : 1}
+        const newProductToCart = {...product.data, amount : newAmount}
 
         newCart.push(newProductToCart)
       }
