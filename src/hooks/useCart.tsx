@@ -35,15 +35,13 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const addProduct = async (productId: number) => {
     try {
       const newCart = [...cart]
-      //buscando dados lá do estoque para saber se ainda tem o produto
-      const response = await api.get('stock')
-      const inStock = response.data
-
-      //encontrando produto no estoque pelo ID
-      const selectedProduct = inStock.find((product: Stock) => product.id === productId)
-
       //verificando se o produto já existe no carrinho
       const alreadyInCart = newCart.find(item => item.id === productId)
+
+      //buscando dados lá do estoque para saber se ainda tem o produto
+      const stock = await api.get(`/stock/${productId}`)
+      const selectedProduct = stock.data
+
       //Se o produto já existe no carrinho, pega a quantidade que já tinha. Else {ZERO}
       const cartAmount = alreadyInCart ? alreadyInCart.amount : 0
       const newAmount = cartAmount + 1
@@ -58,13 +56,16 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       if (alreadyInCart) {
         alreadyInCart.amount = newAmount
       } else {
-        const product = await api.get(`stock/${productId}`)
+        const product = await api.get(`/products/${productId}`)
 
         const newProductToCart = { ...product.data, amount: newAmount }
 
         newCart.push(newProductToCart)
       }
 
+      console.log('new cart:', newCart);
+      
+      
       //setCart altera o valor da variável 'cart' para o que passarmos como parâmetro
       setCart(newCart)
 
